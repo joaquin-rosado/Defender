@@ -1,57 +1,190 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
+import pygame
+ 
+# Define some colors
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+BROWN = (105, 68, 28)
+YELLOW = (245, 237, 15)
+PINK = (245, 15, 138)
+GREEN = (15, 245, 34)
+ORANGE = (245, 149, 15)
+BLUE = (0, 0, 255)
+LIGHT_BLUE = (48, 182, 219)
 
-# C extensions
-*.so
+ 
+pygame.init()
+ 
+# Set the width and height of the screen [width, height]
+size = (700, 500)
+screen = pygame.display.set_mode(size)
+ 
+pygame.display.set_caption("My Game")
 
-# Distribution / packaging
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
+def draw_mountain(screen):
+    pygame.draw.line(screen, BROWN, [0,350], [100, 450], 3)
+    pygame.draw.line(screen, BROWN, [100,450], [190,325], 3)
+    pygame.draw.line(screen, BROWN, [190,325], [300,450], 3)
+    pygame.draw.line(screen, BROWN, [300,450], [400,450], 3)
+    pygame.draw.line(screen, BROWN, [400,450], [410,440], 3)
+    pygame.draw.line(screen, BROWN, [410,440], [415,455], 3)
+    pygame.draw.line(screen, BROWN, [415,455], [430,435], 3)
+    pygame.draw.line(screen, BROWN, [430,435], [440,465], 3)
+    pygame.draw.line(screen, BROWN, [440,465], [460,465], 3)
+    pygame.draw.line(screen, BROWN, [460,465], [463,460], 3)
+    pygame.draw.line(screen, BROWN, [463,460], [470,480], 3)
+    pygame.draw.line(screen, BROWN, [470,480], [530,480], 3)
+    pygame.draw.line(screen, BROWN, [530,480], [560,450], 3)
+    pygame.draw.line(screen, BROWN, [560,450], [590,480], 3)
+    pygame.draw.line(screen, BROWN, [590,480], [630,350], 3)
+    pygame.draw.line(screen, BROWN, [630,350], [640,420], 3)
+    pygame.draw.line(screen, BROWN, [640,420], [650,395], 3)
+    pygame.draw.line(screen, BROWN, [650,395], [700,350], 3)
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+def draw_stars(screen):
+    pygame.draw.ellipse(screen, YELLOW, [150,200,5,5])
+    pygame.draw.ellipse(screen, PINK, [467,214,5,5])
+    pygame.draw.ellipse(screen, GREEN, [8,56,5,5])
+    pygame.draw.ellipse(screen, BLUE, [46,122,5,5])
+    pygame.draw.ellipse(screen, WHITE, [321,398,5,5])
+    pygame.draw.ellipse(screen, RED, [609,14,5,5])
+    pygame.draw.ellipse(screen, ORANGE, [455,358,5,5])
+    pygame.draw.ellipse(screen, GREEN, [260,140,5,5])
+    pygame.draw.ellipse(screen, PINK, [300,100,5,5])
+    pygame.draw.ellipse(screen, YELLOW, [350,250,5,5])
+    pygame.draw.ellipse(screen, ORANGE, [672,325,5,5])
+    pygame.draw.ellipse(screen, BLUE, [524,210,5,5])
+    pygame.draw.ellipse(screen, GREEN, [600,168,5,5])
+    pygame.draw.ellipse(screen, WHITE, [397,10,5,5])
+    pygame.draw.ellipse(screen, RED, [467,214,5,5])
+    pygame.draw.ellipse(screen, LIGHT_BLUE, [509,104,5,5])
+    pygame.draw.ellipse(screen, LIGHT_BLUE, [80,320,5,5])
+    pygame.draw.ellipse(screen, PINK, [120,50,5,5])
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+class Player(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.image.load("Defender_spaceship.png").convert()
+        self.image.set_colorkey(WHITE)
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*,cover
+        self.rect = self.image.get_rect()
+        self.rect.y = y
+        self.rect.x = x
+ 
+        # Set speed vector
+        self.change_x = 0
+        self.change_y = 0
+        self.walls = None
+ 
+    def changespeed(self, x, y):
+        """ Change the speed of the player. """
+        self.change_x += x
+        self.change_y += y
 
-# Translations
-*.mo
-*.pot
+    def update(self):
+        """ Update the player position. """
+        # Move left/right
+        self.rect.x += self.change_x
+        
+        # Move up/down
+        self.rect.y += self.change_y
 
-# Django stuff:
-*.log
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
 
-# Sphinx documentation
-docs/_build/
+        self.image = pygame.Surface([50,5])
+        self.image.fill(PINK)
+        self.image.set_colorkey(WHITE)
 
-# PyBuilder
-target/
+        self.rect = self.image.get_rect()
+
+    def update(self):
+        self.rect.x += 10
+       
+ 
+#------SPRITE GROUPS---
+spaceship_list = pygame.sprite.Group()
+bullet_list = pygame.sprite.Group()
+all_sprite_list = pygame.sprite.Group()
+
+#------ADDING PLAYERS TO SPRITE GROUP----
+spaceship = Player(50,200)
+all_sprite_list.add(spaceship)
+
+bullet = Bullet()
+bullet_list.add(bullet)
+all_sprite_list.add(bullet)
+        
+# Loop until the user clicks the close button.
+done = False
+ 
+# Used to manage how fast the screen updates
+clock = pygame.time.Clock()
+ 
+# -------- Main Program Loop -----------
+while not done:
+    # --- Main event loop
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            done = True
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                spaceship.changespeed(-3,0)
+            elif event.key == pygame.K_RIGHT:
+                spaceship.changespeed(3,0)
+            elif event.key == pygame.K_UP:
+                spaceship.changespeed(0,-3)
+            elif event.key == pygame.K_DOWN:
+                spaceship.changespeed(0,3)
+            elif event.key == pygame.K_SPACE:
+                bullet.rect.x = spaceship.rect.x
+                bullet.rect.y = spaceship.rect.y
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT:
+                spaceship.changespeed(3,0)
+            elif event.key==pygame.K_RIGHT:
+                spaceship.changespeed(-3,0)
+            elif event.key==pygame.K_UP:
+                spaceship.changespeed(0,3)
+            elif event.key==pygame.K_DOWN:
+                spaceship.changespeed(0,-3)
+            elif event.key == pygame.K_SPACE:
+                bullet.rect.x = spaceship.rect.x
+                bullet.rect.y = spaceship.rect.y
+    all_sprite_list.update()
+ 
+
+ 
+    # --- Screen-clearing code goes here
+ 
+    # Here, we clear the screen to white. Don't put other drawing commands
+    # above this, or they will be erased with this command.
+ 
+    # If you want a background image, replace this clear with blit'ing the
+    # background image.
+    screen.fill(BLACK)
+    draw_mountain(screen)
+    draw_stars(screen)
+    all_sprite_list.draw(screen)
+    if event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_LEFT:
+            spaceship.image = pygame.image.load("Defender_spaceship(1).png").convert()
+            bullet.rect.x -= 10
+        
+    if event.type == pygame.KEYUP:
+        if event.key == pygame.K_LEFT:
+            spaceship.image = pygame.image.load("Defender_spaceship(1).png").convert()
+            bullet.rect.x -= 10
+ 
+    # --- Drawing code should go here
+ 
+    # --- Go ahead and update the screen with what we've drawn.
+    pygame.display.flip()
+ 
+    # --- Limit to 60 frames per second
+    clock.tick(60)
+ 
+# Close the window and quit.
+pygame.quit()
